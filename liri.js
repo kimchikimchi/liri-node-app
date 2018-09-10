@@ -25,6 +25,8 @@ function runCommand(command, argument) {
         default:
             console.log("Unknown command");
     }
+
+    writeLog(command, argument);
 }
 
 /*
@@ -136,7 +138,10 @@ function runTextfileCommands() {
 
         var line = data.split(',');
         var command = line.shift();
-        var argument = line.shift();
+        var argument = line.shift().trim();
+        // Remove line-ending
+        argument = argument.replace(/(\r\n|\n|\r)/gm,"");
+        argument = argument.replace(/\"/gm, "");
 
         runCommand(command, argument);
     });
@@ -153,5 +158,20 @@ function makeRequest(url, callback) {
             // Delegate parsing and printing to function passed in callback.
             callback(body);
         }
+    });
+}
+
+/*
+    * In addition to logging the data to your terminal/bash window, output the data to a .txt file called `log.txt`.
+    * Make sure you append each command you run to the `log.txt` file.
+    * Do not overwrite your file each time you run a command.
+*/
+
+function writeLog(command, argument) {
+    var fs = require('fs');
+
+    fs.appendFile('./log.txt', `${command}, "${argument}"\n`, function(err) {
+        if (err) throw err;
+        console.log(`Appending logfile: ${command}, ${argument}\n`);
     });
 }
