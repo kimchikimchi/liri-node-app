@@ -126,8 +126,18 @@ function searchMovie(movie) {
 */
 
 function runTextfileCommands() {
+    var infile = './random.txt';
+    var fs = require('fs');
 
+    fs.readFile(infile, "utf8", function(err, data){
+        if (err) throw err;
 
+        var line = data.split(',');
+        var command = line.shift();
+        var argument = line.shift();
+
+        runCommand(command, argument);        
+    });
 }
 
 
