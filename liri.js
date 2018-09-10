@@ -48,7 +48,7 @@ function searchEvents(artist) {
         });
     };
 
-    makeRequest(url, parser);  
+    makeRequest(url, parser);
 }
 
 /*
@@ -69,13 +69,17 @@ function searchSongs(song) {
     spotify
         .search({ type: 'track', query: song })
         .then(function(response) {
-            console.log(JSON.stringify(response, null, 2));
-            /*
-                artist: tracks.items[?].artists[?].name
-                songName: tracks.items[?].name
-                previewUrl: tracks.items[?].preview_url
-                album: tracks.items[?].album.name
-            */
+            //console.log(JSON.stringify(response, null, 2));
+            var tracks = response.tracks.items;
+
+            tracks.forEach(function(track) {
+                console.log(
+                        `Artist: ${track.artists[0].name}\n` +
+                        `Song:   ${track.name}\n` +
+                        `Preview: ${track.preview_url}\n` +
+                        `Album: ${track.album.name}\n\n`
+                    );
+            });
         })
         .catch(function(err) {
             console.log(err);
