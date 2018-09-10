@@ -101,19 +101,21 @@ function searchSongs(song) {
 function searchMovie(movie) {
     movie = movie || 'Mr. Nobody.';     //default
 
-    var url = `http://www.omdbapi.com/?apikey=${keys.omdb}&s=${movie}`;
+    var url = `http://www.omdbapi.com/?apikey=${keys.omdb}&t=${movie}`;
     var parser = function(data) {
         // console.log(data);
         // data back from webservers are always in string and need conversion
         data = JSON.parse(data);
-        var movies = data.Search;
 
-        movies.forEach(function(movie) {
-            // console.log(movie);
-            console.log(`Title:  ${movie.Title}\n` +
-                        `Year:   ${movie.Year}\n`
-                );
-        });
+        console.log(`Title:  ${data.Title}\n` +
+                    `Year:   ${data.Year}\n` +
+                    `IMDB Rating: ${data.Ratings[0].Value}\n` +
+                    `RT Score: ${data.Ratings[1].Value}\n` +
+                    `Country: ${data.Country}\n` +
+                    `Language: ${data.Language}\n` +
+                    `Plot: ${data.Plot}\n` +
+                    `Actors: ${data.Actors}\n`
+            );
     };
 
     makeRequest(url, parser);
@@ -136,7 +138,7 @@ function runTextfileCommands() {
         var command = line.shift();
         var argument = line.shift();
 
-        runCommand(command, argument);        
+        runCommand(command, argument);
     });
 }
 
