@@ -24,9 +24,12 @@ function runCommand(command, argument) {
 
         default:
             console.log("Unknown command");
+            console.log("USAGE: liri.js concert-this|spotify-this-song|movie-this|do-what-it-says '<search string>'");
     }
 
-    writeLog(command, argument);
+    if (command) {
+        writeLog(command, argument);
+    }
 }
 
 /*
