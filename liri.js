@@ -1,79 +1,89 @@
 // Reading .env files into process.env namespace.
 require('dotenv').config();
-
-// Module imports
 var keys = require('./keys.js');
-var Spotify = require('node-spotify-api');
 
-var spotify = new Spotify(keys.spotify);
-var command =  process.argv[2],
-    argument = process.argv[3];
+runCommand(process.argv[2], process.argv[3]);
 
- /*
-    Take one of the following commands:
-    concert-this
-    spotify-this-song
-    movie-this
-    do-what-it-says
-*/
+function runCommand(command, argument) {
+    switch (command) {
+        case 'concert-this':
+            searchEvents(argument);
+        break;
 
+        case 'spotify-this-song':
+            searchSongs(argument);
+        break;
 
-switch (command) {
-    case 'concert-this':
-        searchEvents(argument);
-    break;
+        case 'movie-this':
+            searchMovie(argument);
+        break;
 
-    case 'spotify-this-song':
-        searchSongs(argument);
-    break;
+        case 'do-what-it-says':
+            runTextfileCommands();
+        break;
 
-    case 'movie-this':
-        searchMovie(argument);
-
-    break;
-
-    case 'do-what-it-says':
-        runTextfileCommands();
-    break;
-
-    default:
-        console.log("Unknown command");
+        default:
+            console.log("Unknown command");
+    }
 }
 
 /*
    * This will search the Bands in Town Artist Events API (`"https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp"`) for an artist and render the following information about each event to the terminal:
-
      * Name of the venue
-
      * Venue location
-
      * Date of the Event (use moment to format this as "MM/DD/YYYY")
 */
-function searchEvents(artist) {
 
+function searchEvents(artist) {
+    var url = `https://rest.bandsintown.com/artists/${artist}/events?app_id=${keys.bandsintown}`;
+    var parser = function(data) {
+        // data back from webservers are always in string and need conversion
+        data = JSON.parse(data);
+
+        data.forEach(function(event) {
+            console.log(`${event.datetime}, ` +
+                        `${event.venue.name}, ` +
+                        `${event.venue.city} ${event.venue.region}`
+                );
+        });
+    };
+
+    makeRequest(url, parser);  
 }
 
 /*
    * This will show the following information about the song in your terminal/bash window
-
      * Artist(s)
-
      * The song's name
-
      * A preview link of the song from Spotify
-
      * The album that the song is from
 */
 
 function searchSongs(song) {
+    // Reading keys from .env file.
+    var Spotify = require('node-spotify-api');
+    var spotify = new Spotify(keys.spotify);
 
+    song = song || "The Sign";    // default
 
+    spotify
+        .search({ type: 'track', query: song })
+        .then(function(response) {
+            console.log(JSON.stringify(response, null, 2));
+            /*
+                artist: tracks.items[?].artists[?].name
+                songName: tracks.items[?].name
+                previewUrl: tracks.items[?].preview_url
+                album: tracks.items[?].album.name
+            */
+        })
+        .catch(function(err) {
+            console.log(err);
+        });
 }
 
 /*
     * This will output the following information to your terminal/bash window:
-
-     ```
        * Title of the movie.
        * Year the movie came out.
        * IMDB Rating of the movie.
@@ -82,12 +92,27 @@ function searchSongs(song) {
        * Language of the movie.
        * Plot of the movie.
        * Actors in the movie.
-     ```
 */
 
 function searchMovie(movie) {
+    movie = movie || 'Mr. Nobody.';     //default
 
+    var url = `http://www.omdbapi.com/?apikey=${keys.omdb}&s=${movie}`;
+    var parser = function(data) {
+        // console.log(data);
+        // data back from webservers are always in string and need conversion
+        data = JSON.parse(data);
+        var movies = data.Search;
 
+        movies.forEach(function(movie) {
+            // console.log(movie);
+            console.log(`Title:  ${movie.Title}\n` +
+                        `Year:   ${movie.Year}\n`
+                );
+        });
+    };
+
+    makeRequest(url, parser);
 }
 
 /*
@@ -99,4 +124,18 @@ function searchMovie(movie) {
 function runTextfileCommands() {
 
 
+}
+
+
+function makeRequest(url, callback) {
+    var request = require('request');
+
+    request(url, function (error, response, body) {
+        if (error) {
+            console.log('error:', error); 
+        } else {
+            // Delegate parsing and printing to function passed in callback.
+            callback(body);
+        }
+    });
 }
