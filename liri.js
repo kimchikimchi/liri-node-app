@@ -39,11 +39,13 @@ function runCommand(command, argument) {
 function searchEvents(artist) {
     var url = `https://rest.bandsintown.com/artists/${artist}/events?app_id=${keys.bandsintown}`;
     var parser = function(data) {
+        var moment = require('moment');
         // data back from webservers are always in string and need conversion
         data = JSON.parse(data);
 
         data.forEach(function(event) {
-            console.log(`${event.datetime}, ` +
+            var date = moment(event.datetime).format("MMM D YYYY hh:mm A")
+            console.log(`${date}, ` +
                         `${event.venue.name}, ` +
                         `${event.venue.city} ${event.venue.region}`
                 );
